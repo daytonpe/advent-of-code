@@ -68,6 +68,8 @@ const powerConsumption = (report = []) => {
 
 powerConsumption(report)
 
+// *****************************************************************************
+
 // Part 2
 
 const updateMatcher = (report, metric) => {
@@ -105,19 +107,12 @@ const calcRating = (report, codeLength, metric) => {
       break
     }
 
-    const updatedFilteredReport = [];
-    
-    // TODO: change this to use the filter() command?
-    for (let c = 0; c < filteredReport.length; c++) {
-
+    const updatedFilteredReport = filteredReport.filter(code => {
       // if our current code has the same index in the gamma number (most 
       // common), we push it to our updatedFilterReport
-      if (filteredReport[c][i] ==  matcher[i]){
-        updatedFilteredReport.push(filteredReport[c])
-      }
-
-    }
-
+      return code[i] == matcher[i]
+    });
+  
     // reset the filtered report with the updates
     filteredReport = updatedFilteredReport;
     
