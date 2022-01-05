@@ -40,8 +40,6 @@ Consider only horizontal and vertical lines. At how many points do at least two 
 
 Your puzzle answer was 5147.
 
-The first half of this puzzle is complete! It provides one gold star: *
-
 --- Part Two ---
 
 Unfortunately, considering only horizontal and vertical lines doesn't give you the full picture; you need to also consider diagonal lines.
@@ -65,3 +63,6 @@ Considering all lines from the above example would now produce the following dia
 You still need to determine the number of points where at least two lines overlap. In the above example, this is still anywhere in the diagram with a 2 or larger - now a total of 12 points.
 
 Consider all of the lines. At how many points do at least two lines overlap?
+
+Your puzzle answer was 16925.
+

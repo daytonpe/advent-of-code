@@ -34,8 +34,6 @@ Use the binary numbers in your diagnostic report to calculate the gamma rate and
 
 Your puzzle answer was 845186.
 
-The first half of this puzzle is complete! It provides one gold star: *
-
 --- Part Two ---
 
 Next, you should verify the life support rating, which can be determined by multiplying the oxygen generator rating by the CO2 scrubber rating.
@@ -66,3 +64,5 @@ As there is only one number left, stop; the CO2 scrubber rating is 01010, or 10 
 Finally, to find the life support rating, multiply the oxygen generator rating (23) by the CO2 scrubber rating (10) to get 230.
 
 Use the binary numbers in your diagnostic report to calculate the oxygen generator rating and CO2 scrubber rating, then multiply them together. What is the life support rating of the submarine? (Be sure to represent your answer in decimal, not binary.)
+
+Your puzzle answer was 4636702.
