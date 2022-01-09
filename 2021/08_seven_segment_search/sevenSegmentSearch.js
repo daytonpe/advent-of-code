@@ -1,4 +1,4 @@
-const { count } = require('console');
+// MARK Input Reader
 
 const inputToArray = (file) => {
   const fs = require('fs');

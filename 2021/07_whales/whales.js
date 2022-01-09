@@ -1,3 +1,5 @@
+// MARK Input Reader
+
 const inputToArray = (file) => {
   const fs = require('fs');
   let array = fs.readFileSync(file).toString().split(",");
