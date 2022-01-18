@@ -17,6 +17,8 @@ const inputToArray = (file) => {
   return {polymer, rules}
 }
 
+// MARK - Part 1
+
 const score = (polymer) => {
 
   const counts = {};
@@ -48,8 +50,6 @@ const score = (polymer) => {
 
   return maxCount - minCount;
 }
-
-// MARK - Part 1
 
 const main = (filename = "test_input.txt", steps = 10) => {
 
