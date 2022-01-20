@@ -1,0 +1,15 @@
+{
+  "extends": ["airbnb-base", "prettier"],
+  "plugins": ["prettier"],
+  "rules": {
+    "prettier/prettier": ["error"],
+    "newline-per-chained-call": ["error"],
+    "comma-dangle": ["error", "never"],
+    "no-useless-escape": "warn",
+    "no-console": "off",
+    "no-plusplus": "off"
+  },
+  "parserOptions": {
+    "ecmaVersion": 2020
+  }
+}
