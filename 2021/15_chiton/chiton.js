@@ -1,4 +1,5 @@
 const fs = require('fs');
+const PriorityQueue = require('priorityqueuejs');
 
 // MARK - Types
 
@@ -8,48 +9,6 @@ class Node {
     this.value = value;
     this.visited = false;
     this.coords = coords;
-  }
-}
-
-// build an Set object to store nodes
-class NodeSet {
-  constructor() {
-    this.nodes = []
-  }
-
-  length() { 
-    return this.nodes.length;
-  }
-
-  add(newNode) {
-    for (let i = 0; i < this.nodes.length; i++){
-      const node = this.nodes[i];
-      if (node.coords[0] === newNode.coords[0] && node.coords[1] === newNode.coords[1]){
-        return this.nodes;
-      }
-    };
-    this.nodes.push(newNode);
-    return this.nodes;
-  }
-
-  remove(paramNode) {
-    for (let i = 0; i < this.nodes.length; i++){
-      const node = this.nodes[i];
-      if (node.coords[0] === paramNode.coords[0] && node.coords[1] === paramNode.coords[1]){
-        this.nodes = [...this.nodes.slice(0,i), ...this.nodes.slice(i+1)];
-        return this.nodes;
-      }
-    };
-  }
-
-  includes(paramNode) {
-    for (let i = 0; i < this.nodes.length; i++){
-      const node = this.nodes[i];
-      if (node.coords[0] === paramNode.coords[0] && node.coords[1] === paramNode.coords[1]){
-        return true
-      }
-    };
-    return false
   }
 }
 
@@ -66,19 +25,6 @@ const inputToArray = (file) => {
 }
 
 // MARK - Part 1
-
-
-const getUnvisitedNodes = (cave) => {
-  const unvisitedNodes = new NodeSet();
-
-  cave.forEach(line => {
-    line.forEach(element => {
-      unvisitedNodes.add(element);
-    })
-  })
-
-  return unvisitedNodes;
-}
 
 const prettyPrint = (cave) => {
   console.log(`\n\VALUES:\n`);
@@ -110,77 +56,74 @@ const prettyPrint = (cave) => {
 
 const getAdjacentNodes = (cave, node) => {
 
-  const adjacentNodes = new NodeSet();
+  // const adjacentNodes = new NodeSet();
+  const adjacentNodes = [];
   const [x,y] = node.coords;
 
   // if there is a node above that is unvisited, add it to the set
-  if (y > 0) adjacentNodes.add(cave[y-1][x]);
+  if (y > 0) adjacentNodes.push(cave[y-1][x]);
 
   // same for left
-  if (x > 0) adjacentNodes.add(cave[y][x-1]);
+  if (x > 0) adjacentNodes.push(cave[y][x-1]);
 
   // same for right
-  if (x < cave[y].length - 1) adjacentNodes.add(cave[y][x+1]);
+  if (x < cave[y].length - 1) adjacentNodes.push(cave[y][x+1]);
 
   // same for below
-  if (y < cave.length - 1) adjacentNodes.add(cave[y+1][x]);
+  if (y < cave.length - 1) adjacentNodes.push(cave[y+1][x]);
 
   return adjacentNodes
 }
 
-// Convert to priority queue
-const getLowestRiskUnvisitedNode = (cave) => {
-  let nextNode = new Node();
-  for (let y = 0; y < cave.length; y++){
-    for (let x = 0; x < cave[y].length; x++){
-      const node = cave[y][x];
-      if (!node.visited && (!nextNode.risk || node.risk < nextNode.risk)){
-        nextNode = node;
-      }
-    }
-  }
-  return nextNode;
-}
-
-
-// MARK Dijkstra
+// MARK Dijkstra with Priority Queue
 
 const dijkstra = (cave) => {
+
+  const queue = new PriorityQueue((a, b) => b.risk - a.risk);
 
   // initialize our first node
   const initialNode = cave[0][0];
   initialNode.risk = 0; // only for the initial spot based on the instructions
   
   let currentNode = initialNode;
+  queue.enq(currentNode)
   
-  // could maybe do count of visited nodes to save a little time instead
-  let unvisitedNodes = getUnvisitedNodes(cave); 
-  
-  
-  while(unvisitedNodes.length() > 0){
+  while (queue.size() > 0) {
     currentNode.visited = true;
-    unvisitedNodes.remove(currentNode);
 
     // update the risk levels of the adjacent nodes if needed. 
     const adjacentNodes = getAdjacentNodes(cave, currentNode);
-    adjacentNodes.nodes.forEach(adjNode => {
+    adjacentNodes.forEach(adjNode => {
+        
       if (adjNode.risk > currentNode.risk + adjNode.value) {
         adjNode.risk = currentNode.risk + adjNode.value; 
       }
+      
+      // enqueue the unvisited nodes
+      if (!adjNode.visited){
+        queue.enq(adjNode);
+      }
     });
 
-    currentNode = getLowestRiskUnvisitedNode(cave);
-  }
-
+    // things can be enqueued multiple times before they are visited and our
+    // priority queue does not filter out duplicates. So we must check that the
+    // new current node hasn't already been visited. If it has, we keep deq'ing
+    // until we've found an unvisited node.
+    currentNode = queue.deq();
+    while(queue.size() !== 0 && currentNode.visited){
+      currentNode = queue.deq();
+    }
+  };
+  
   return cave;
-}
+} 
+
+// MARK: Part 1 Main
 
 const main = (filename = 'test_input.txt') => {
   let cave = inputToArray(filename);
 
   cave = dijkstra(cave)
-  
-  // prettyPrint(cave)
 
   console.log('Cave Exit Risk:', cave[cave.length-1][cave[0].length-1].risk);
 }
@@ -189,7 +132,7 @@ const main = (filename = 'test_input.txt') => {
 // main('input.txt')
 
 
-// MARK: Part 2
+// MARK: Part 2 Helpers
 
 // increment function to "wrap around" 9 back to 0, even if we add multiple
 const increment = (x, increments) => {
@@ -197,8 +140,6 @@ const increment = (x, increments) => {
   const soln =  (newX > 9) ? (newX % 9) : newX;
   return soln
 };
-
-console.log(increment(8,1));
 
 const incrementCave = (cave, incrementAmount) => {
   for (let y = 0; y < cave.length; y++){
@@ -215,7 +156,6 @@ const getExpandedCave = (cave) => {
   const caveHeight = cave.length;
   const xDim = caveWidth * 5;
 
-
   // have to use map here or else it passes by reference
   const expandedCave = new Array(caveHeight).fill().map(() => {
     return new Array(xDim).fill().map(() => new Node(0))
@@ -226,7 +166,6 @@ const getExpandedCave = (cave) => {
     for (let x = 0; x < expandedCave[y].length; x++){ 
       const caveValue = cave[y % cave.length][x % caveWidth].value;
       
-
       let inc = 0
         if (x < caveWidth) {
           inc = 0
@@ -249,14 +188,14 @@ const getExpandedCave = (cave) => {
     }
   }
 
-  // then expand down
+  // expand down
   for (let i = 1; i < 5; i++){
     const expandedCaveCopy = JSON.parse(JSON.stringify(expandedCave.slice(0,caveHeight))); // hate this but it works
     incrementCave(expandedCaveCopy, i);
     expandedCave.push(...expandedCaveCopy)
   }
 
-  // TODO combine this loop so we don't have to loop again.
+  // Initialize our new cave's coords and risk.
   for (let y = 0; y < expandedCave.length; y++){
     for (let x = 0; x < expandedCave[y].length; x++){ 
       expandedCave[y][x].coords = [x,y];
@@ -266,21 +205,19 @@ const getExpandedCave = (cave) => {
 
   return expandedCave;
 }
+
+// MARK Part 2 Main
+
 const main2 = (filename = 'test_input.txt') => {
   let cave = inputToArray(filename);
   
-  // prettyPrint(cave)
-  
   let expandedCave = getExpandedCave(cave);
-  // prettyPrint(expandedCave)
 
-  // prettyPrint(expandedCave)
   expandedCave = dijkstra(expandedCave)
   
-
   console.log('Cave Exit Risk:', expandedCave[expandedCave.length-1][expandedCave[0].length-1].risk);
   
 }
 
-// main2()
+main2()
 main2('input.txt')
